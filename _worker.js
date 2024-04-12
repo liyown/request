@@ -1,22 +1,17 @@
-const TELEGRAPH_URL = 'https://api.openai.com';
+const express = require('express');
+const router = express.Router();
+const request = require('request');
 
-addEventListener('fetch', event => {
-  event.respondWith(handleRequest(event.request))
-})
-
-async function handleRequest(request) {
-  const url = new URL(request.url);
-  const headers_Origin = request.headers.get("Access-Control-Allow-Origin") || "*"
-  url.host = TELEGRAPH_URL.replace(/^https?:\/\//, '');
-  const modifiedRequest = new Request(url.toString(), {
-    headers: request.headers,
-    method: request.method,
-    body: request.body,
-    redirect: 'follow'
-  });
-  const response = await fetch(modifiedRequest);
-  const modifiedResponse = new Response(response.body, response);
-  // 添加允许跨域访问的响应头
-  modifiedResponse.headers.set('Access-Control-Allow-Origin', headers_Origin);
-  return modifiedResponse;
+router.get('/', function(req, res, next) {
+    let url = req.query.url;
+    let bibtex = '';
+    request(url, function (error, response, body) {
+        if (!error && response.statusCode === 200) {
+            bibtex = body;
+            res.send(bibtex);
+        }
+        else {
+            res.send('Error: ' + error);
+        }
+    });
 }
